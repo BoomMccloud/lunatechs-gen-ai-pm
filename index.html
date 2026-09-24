@@ -74,8 +74,86 @@
   .slide.active > *:nth-child(6) { animation-delay: 580ms; }
 
   @keyframes rise {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(12px); filter: blur(6px); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+
+  /* Columns inside a row arrive one after another */
+  .slide.active .row > .col:not(.step) { animation: rise 600ms cubic-bezier(0.22, 0.61, 0.36, 1) backwards; }
+  .slide.active .row > .col:nth-child(1):not(.step) { animation-delay: 260ms; }
+  .slide.active .row > .col:nth-child(2):not(.step) { animation-delay: 400ms; }
+  .slide.active .row > .col:nth-child(3):not(.step) { animation-delay: 540ms; }
+
+  /* Build step that rises into view on the next key press */
+  .slide.active > .step { animation: none; }
+  .rise {
+    opacity: 0;
+    transform: translateY(0.5em);
+    filter: blur(8px);
+    transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 0.61, 0.18, 1), filter 0.5s ease;
+  }
+  .rise.shown,
+  .deck.overview .rise { opacity: 1; transform: none; filter: none; }
+
+  /* Slam: punches in oversized and blurred, then settles */
+  span.slam { display: inline-block; }
+  .slide.active .slam:not(.step) { animation: slam 650ms cubic-bezier(0.2, 1.15, 0.3, 1) 350ms backwards; }
+  .slide.active .slam.shown { animation: slam 650ms cubic-bezier(0.2, 1.15, 0.3, 1) both; }
+  @keyframes slam {
+    0%   { opacity: 0; transform: scale(1.25); filter: blur(10px); }
+    60%  { opacity: 1; transform: scale(0.985); filter: blur(0); }
+    80%  { transform: scale(1.01); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* About Me: light sentence, key phrases ink in one by one */
+  .bio {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30, 'wght' 600;
+    font-size: clamp(2.2rem, 4.2vw, 4.2rem);
+    line-height: 1.16;
+    letter-spacing: -0.02em;
+    color: var(--faint);
+    max-width: 22ch;
+  }
+  .bio b { font-weight: inherit; color: var(--fg); }
+  .bio b.key { color: var(--accent); }
+  .slide.active .bio b { animation: ink 700ms ease backwards; }
+  .slide.active .bio b:nth-of-type(1) { animation-delay: 0.6s; }
+  .slide.active .bio b:nth-of-type(2) { animation-delay: 0.95s; }
+  .slide.active .bio b:nth-of-type(3) { animation-delay: 1.3s; }
+  .slide.active .bio b:nth-of-type(4) { animation-delay: 1.65s; }
+  .slide.active .bio b:nth-of-type(5) { animation-delay: 2s; }
+  .slide.active .bio b:nth-of-type(6) { animation-delay: 2.35s; }
+  @keyframes ink { from { color: var(--faint); } }
+
+  /* Recap rows wipe in from the left */
+  .recap { margin-top: 2.2rem; }
+  .recap p {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 36, 'SOFT' 50, 'wght' 450;
+    font-size: clamp(1.4rem, 2.1vw, 2.3rem);
+    line-height: 1.3;
+    margin: 0.35em 0;
+  }
+  .recap .label { margin-top: 1.4rem; }
+  .recap .label:first-child { margin-top: 0; }
+  .slide.active .recap > * { animation: wipe 700ms cubic-bezier(0.22, 0.61, 0.18, 1) backwards; }
+  .slide.active .recap > :nth-child(1) { animation-delay: 0.35s; }
+  .slide.active .recap > :nth-child(2) { animation-delay: 0.55s; }
+  .slide.active .recap > :nth-child(3) { animation-delay: 0.75s; }
+  .slide.active .recap > :nth-child(4) { animation-delay: 1.05s; }
+  .slide.active .recap > :nth-child(5) { animation-delay: 1.25s; }
+  .slide.active .recap > :nth-child(6) { animation-delay: 1.45s; }
+  .slide.active .recap > :nth-child(7) { animation-delay: 1.75s; }
+  @keyframes wipe {
+    from { opacity: 0; transform: translateX(-0.4em); clip-path: inset(0 100% -25% 0); filter: blur(3px); }
+    to   { opacity: 1; transform: none; clip-path: inset(0 -3% -25% 0); filter: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide.active > *, .slide.active .row > .col, .slide.active .slam, .slide.active .bio b, .slide.active .recap > * { animation: none !important; }
+    .rise, .strike { transition: none; filter: none; }
   }
 
   /* "Seal" slide number in top-right corner — vermillion square, hanko-style */
@@ -398,6 +476,9 @@
   .deck.overview .slide .body { font-size: 0.55rem; max-width: none; line-height: 1.4; }
   .deck.overview .slide .breadcrumb { font-size: 0.45rem; margin-top: 0.5rem; }
   .deck.overview .slide .stamp { font-size: 0.75rem; }
+  .deck.overview .slide .bio { font-size: 0.8rem; }
+  .deck.overview .slide .recap p { font-size: 0.5rem; }
+  .deck.overview .slide .recap { margin-top: 0.4rem; }
   .deck.overview .slide .stamp::before { display: none; }
   .deck.overview .slide .row { gap: 1rem; margin-top: 0.5rem; }
   .deck.overview .slide .col { max-width: none; }
@@ -415,7 +496,7 @@
   <!-- Slide 1: Title -->
   <section class="slide center" data-title="Title">
     <img src="images/headshot.jpg" alt="Jason Xu" class="headshot" onerror="this.style.display='none'" />
-    <h1>PM in the <span class="accent">Gen AI Era</span></h1>
+    <h1>PM in the <span class="accent slam">Gen AI Era</span></h1>
     <div class="author">
       Jason Xu
     </div>
@@ -426,7 +507,12 @@
     </div>
   </section>
 
-  <!-- Slide 2: Intro Context — Two Extremes -->
+  <!-- Slide 2: About Me -->
+  <section class="slide left" data-title="About Me">
+    <p class="bio">I am a <b>product manager turned builder</b>, with <b>10+ years</b> in <b>scaled-out distributed systems</b>, bringing <b>modern UX</b> to <b>traditional enterprise software</b>, and now helping teams become <b class="key">AI-native</b>.</p>
+  </section>
+
+  <!-- Slide 3: Intro Context — Two Extremes -->
   <section class="slide left" data-title="Big Tech vs. Solo Builder">
     <div class="label" style="margin-bottom: 2.5rem;">My Background</div>
     <div class="row" style="margin-top: 0; align-items: flex-start;">
@@ -445,7 +531,7 @@
     </div>
   </section>
 
-  <!-- Slide 3: Table of Contents -->
+  <!-- Slide 4: Table of Contents -->
   <section class="slide left" data-title="Table of Contents">
     <div class="row" style="margin-top: 0; align-items: flex-start;">
       <div class="col">
@@ -459,7 +545,7 @@
     </div>
   </section>
 
-  <!-- Slide 4: Three Jobs Called PM -->
+  <!-- Slide 5: Three Jobs Called PM -->
   <section class="slide left" data-title="Three Jobs Called PM">
     <h1>Three jobs called PM.</h1>
     <div class="row" style="margin-top: 3.5rem;">
@@ -484,7 +570,7 @@
     </div>
   </section>
 
-  <!-- Slide 5: The Original Bridge -->
+  <!-- Slide 6: The Original Bridge -->
   <section class="slide center" data-title="The Bridge">
     <div>
       <div class="label" style="font-size: clamp(0.9rem, 1.2vw, 1.25rem); margin-bottom: 0.4rem;">The Problem</div>
@@ -512,10 +598,10 @@
     </div>
   </section>
 
-  <!-- Slide 6: The Question -->
+  <!-- Slide 7: The Question -->
   <section class="slide left" data-title="What Does the PM Do?">
     <div class="row" style="margin-top: 0;">
-      <div class="col">
+      <div class="col step rise">
         <h2 style="font-family: 'Fraunces', Georgia, serif; font-size: clamp(2.2rem, 3.4vw, 3.6rem); font-weight: 600; letter-spacing: -0.02em; color: var(--fg); margin-bottom: 0.6rem;">
           Sales
         </h2>
@@ -523,7 +609,7 @@
           Codes their own demo
         </div>
       </div>
-      <div class="col">
+      <div class="col step rise">
         <h2 style="font-family: 'Fraunces', Georgia, serif; font-size: clamp(2.2rem, 3.4vw, 3.6rem); font-weight: 600; letter-spacing: -0.02em; color: var(--fg); margin-bottom: 0.6rem;">
           Designers
         </h2>
@@ -531,7 +617,7 @@
           Ship their own A/B test
         </div>
       </div>
-      <div class="col">
+      <div class="col step rise">
         <h2 style="font-family: 'Fraunces', Georgia, serif; font-size: clamp(2.2rem, 3.4vw, 3.6rem); font-weight: 600; letter-spacing: -0.02em; color: var(--fg); margin-bottom: 0.6rem;">
           Engineers
         </h2>
@@ -540,12 +626,12 @@
         </div>
       </div>
     </div>
-    <h1 style="margin-top: 4.5rem; color: var(--accent); font-size: clamp(2.8rem, 5.2vw, 5rem); line-height: 1.1;">
+    <h1 class="step rise slam" style="margin-top: 4.5rem; color: var(--accent); font-size: clamp(2.8rem, 5.2vw, 5rem); line-height: 1.1;">
       What does the PM do?
     </h1>
   </section>
 
-  <!-- Slide 7: PMs = Process + Problem -->
+  <!-- Slide 8: PMs = Process + Problem -->
   <section class="slide left" data-title="PMs = Process + Problem">
     <h1 style="font-size: clamp(2.6rem, 5.2vw, 4.8rem); line-height: 1.1;">
       PMs = Process + Problem
@@ -566,10 +652,10 @@
     </div>
   </section>
 
-  <!-- Slide 8: The Danger Zone Matrix -->
+  <!-- Slide 9: The Danger Zone Matrix -->
   <section class="slide left" data-title="Where Do You Spend Your Time">
     <h1 style="font-size: clamp(2.4rem, 4.6vw, 4rem); line-height: 1.12;">
-      Where do you spend <span style="color: var(--accent);">your time</span>?
+      Where do you spend <span class="slam" style="color: var(--accent);">your time</span>?
     </h1>
     <table style="width: 100%; max-width: 1100px; border-collapse: separate; border-spacing: 1.2rem; margin-top: 2rem;">
       <thead>
@@ -636,7 +722,7 @@
     </table>
   </section>
 
-  <!-- Slide 9: The AI-Native PM -->
+  <!-- Slide 10: The AI-Native PM -->
   <section class="slide left" data-title="The AI-Native PM">
     <h1>The AI-Native PM.</h1>
     <div class="row" style="margin-top: 3rem;">
@@ -664,22 +750,22 @@
     </div>
   </section>
 
-  <!-- Slide 10: Pillar 2 Section Divider -->
+  <!-- Slide 11: Pillar 2 Section Divider -->
   <section class="slide center" data-title="AI-Native Teams">
-    <div class="display">AI-Native Teams Will Destroy Traditional Teams.</div>
+    <div class="display slam">AI-Native Teams Will Destroy Traditional Teams.</div>
   </section>
 
-  <!-- Slide 11: The Two Forces -->
+  <!-- Slide 12: The Two Forces -->
   <section class="slide left" data-title="The Two Forces">
     <h1>Two forces destroying traditional companies.</h1>
     <div class="row" style="margin-top: 3.5rem;">
-      <div class="col">
+      <div class="col step rise">
         <div class="label">01 · Economics</div>
         <div class="body large" style="margin-top: 1.2rem; font-family: 'Fraunces', Georgia, serif; font-size: clamp(1.8rem, 2.6vw, 3rem); font-variation-settings: 'opsz' 40, 'SOFT' 50, 'wght' 500;">
           Code is nearly free.
         </div>
       </div>
-      <div class="col">
+      <div class="col step rise">
         <div class="label" style="color: var(--accent);">02 · Velocity</div>
         <div class="body large" style="margin-top: 1.2rem; font-family: 'Fraunces', Georgia, serif; font-size: clamp(1.8rem, 2.6vw, 3rem); font-variation-settings: 'opsz' 40, 'SOFT' 50, 'wght' 500; color: var(--accent);">
           Agents work 24/7.
@@ -688,11 +774,11 @@
     </div>
   </section>
 
-  <!-- Slide 12: The Token Bottleneck -->
+  <!-- Slide 13: The Token Bottleneck -->
   <section class="slide left" data-title="The Token Bottleneck">
     <h1 style="font-size: clamp(2.4rem, 4.8vw, 4.4rem); line-height: 1.12;">
       Meetings are now<br/>
-      <span style="color: var(--accent);">the token bottleneck.</span>
+      <span class="slam" style="color: var(--accent);">the token bottleneck.</span>
     </h1>
     <div class="row" style="margin-top: 4rem;">
       <div class="col">
@@ -701,28 +787,45 @@
           3–5 tokens / sec
         </div>
       </div>
-      <div class="col">
+      <div class="col step rise">
         <div class="label" style="color: var(--accent);">A Single Agent</div>
         <div class="body large" style="margin-top: 1.2rem; font-family: 'Fraunces', Georgia, serif; font-size: clamp(2.2rem, 3.4vw, 3.8rem); font-weight: 500; line-height: 1.15; color: var(--accent);">
-          100 tokens / sec
+          <span data-count-to="100">100</span> tokens / sec
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Slide 13: The Client Delivery Organization -->
+  <!-- Slide 14: The Client Delivery Organization -->
   <section class="slide left" data-title="Client Delivery Org">
     <h1>The Client Delivery Organization.</h1>
-    <p class="body large accent" style="margin-top: 2.5rem;">
-      Functional silos are dead. There is only Client Delivery.
-    </p>
+    <div class="row" style="margin-top: 3.5rem;">
+      <div class="col">
+        <div class="label">Before</div>
+        <div class="body large" style="margin-top: 0.8rem; font-family: 'Fraunces', Georgia, serif; font-size: clamp(1.8rem, 2.5vw, 2.8rem);">
+          Product → Design → Engineering.
+        </div>
+        <p class="muted" style="margin-top: 0.8rem; font-size: clamp(1.1rem, 1.5vw, 1.6rem);">
+          Meetings are the handoff.
+        </p>
+      </div>
+      <div class="col step rise">
+        <div class="label" style="color: var(--accent);">Now</div>
+        <div class="body large" style="margin-top: 0.8rem; font-family: 'Fraunces', Georgia, serif; font-size: clamp(1.8rem, 2.5vw, 2.8rem); color: var(--accent);">
+          One team per client.
+        </div>
+        <p class="muted" style="margin-top: 0.8rem; font-size: clamp(1.1rem, 1.5vw, 1.6rem);">
+          Demo by the end of the meeting.
+        </p>
+      </div>
+    </div>
   </section>
 
-  <!-- Slide 14: Pick Your Class -->
+  <!-- Slide 15: Pick Your Class -->
   <section class="slide left" data-title="Pick Your Class">
     <h1>Pick your class.</h1>
     <div class="row" style="margin-top: 3.5rem;">
-      <div class="col">
+      <div class="col step rise">
         <div class="label">The Beastmaster</div>
         <div class="body large" style="margin-top: 0.8rem; font-family: 'Fraunces', Georgia, serif; font-size: clamp(1.8rem, 2.5vw, 2.8rem);">
           Agent Swarms
@@ -731,7 +834,7 @@
           Commands fleets of 24/7 background agents. Eval harnesses and autonomous loops.
         </p>
       </div>
-      <div class="col">
+      <div class="col step rise">
         <div class="label">The Knight</div>
         <div class="body large" style="margin-top: 0.8rem; font-family: 'Fraunces', Georgia, serif; font-size: clamp(1.8rem, 2.5vw, 2.8rem);">
           Frontline FDE
@@ -740,7 +843,7 @@
           Boots on the ground at the customer edge. High taste, rapid deployment, frontline battle.
         </p>
       </div>
-      <div class="col">
+      <div class="col step rise">
         <div class="label" style="color: var(--accent);">The Mage</div>
         <div class="body large" style="margin-top: 0.8rem; font-family: 'Fraunces', Georgia, serif; font-size: clamp(1.8rem, 2.5vw, 2.8rem); color: var(--accent);">
           Business Architect
@@ -752,7 +855,7 @@
     </div>
   </section>
 
-  <!-- Slide 15: Two Ways Forward -->
+  <!-- Slide 16: Two Ways Forward -->
   <section class="slide left" data-title="Two Ways Forward">
     <h1>Two Ways Forward</h1>
     <div class="row" style="margin-top: 3.5rem;">
@@ -780,7 +883,21 @@
     </p>
   </section>
 
-  <!-- Slide 16: Q&A / Outro -->
+  <!-- Slide 17: Recap -->
+  <section class="slide left" data-title="Recap">
+    <h1>The short version.</h1>
+    <div class="recap">
+      <div class="label">Part 01 · The PRD is Dead.</div>
+      <p>PMs own the problem, not the process.</p>
+      <p>Communicate in product, not documents.</p>
+      <div class="label" style="color: var(--accent);">Part 02 · AI-Native Teams Will Destroy Traditional Teams.</div>
+      <p>Code is nearly free, and agents work 24/7.</p>
+      <p>Functional silos collapse into Client Delivery.</p>
+      <p class="accent">Both ways forward start with the user.</p>
+    </div>
+  </section>
+
+  <!-- Slide 18: Q&A / Outro -->
   <section class="slide center" data-title="Questions">
     <h1>Questions & Discussion</h1>
     <img src="images/linkedin-qr.jpg" alt="LinkedIn QR" class="qr"
@@ -819,7 +936,7 @@
   function next() {
     if (overviewMode) return;
     const pending = steps(slides[current]).find(el => !el.classList.contains('shown'));
-    if (pending) pending.classList.add('shown');
+    if (pending) { pending.classList.add('shown'); countUp(pending); }
     else show(current + 1);
   }
 
@@ -828,6 +945,23 @@
     const shown = steps(slides[current]).filter(el => el.classList.contains('shown'));
     if (shown.length) shown[shown.length - 1].classList.remove('shown');
     else show(current - 1, true);
+  }
+
+  // Numbers marked data-count-to count up from zero when their step appears
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function countUp(root) {
+    root.querySelectorAll('[data-count-to]').forEach(el => {
+      const to = Number(el.dataset.countTo);
+      if (reducedMotion) { el.textContent = to; return; }
+      const start = performance.now(), duration = 1400;
+      const tick = now => {
+        const t = Math.min(1, (now - start) / duration);
+        el.textContent = Math.round(to * (1 - Math.pow(1 - t, 3)));
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      el.textContent = '0';
+      requestAnimationFrame(tick);
+    });
   }
 
   function show(i, revealSteps = false) {
